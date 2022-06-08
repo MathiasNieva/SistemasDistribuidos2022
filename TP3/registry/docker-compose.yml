@@ -1,0 +1,44 @@
+version: "3.0"
+services:
+  broker: # name of the broker
+    image: eclipse-mosquitto
+    ports:
+      - 1883:1883
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    deploy:
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+  mqtt-pub: # name of the container
+    image: 127.0.0.1:5000/mqtt-pub
+    build: ../mqttPub
+    environment:
+      - THEHOST=mqtt://research.upb.edu:21182
+      - THETOPIC=ds
+    deploy:
+      replicas: 5
+      restart_policy: 
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    depends_on:
+      - broker
+  mqtt-sub: # name of the container
+    image: 10.1.2.118:5000/mqtt-sub
+    build: ../mqttSub
+    environment:
+      - THEHOST=mqtt://research.upb.edu:21182
+      - THETOPIC=ds
+    deploy:
+      replicas: 5
+      restart_policy: 
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
+    depends_on:
+      - broker
+
+  
