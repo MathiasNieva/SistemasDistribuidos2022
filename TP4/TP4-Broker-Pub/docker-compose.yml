@@ -1,0 +1,17 @@
+version: "3.0"
+services:
+  broker: # name of the broker
+    image: eclipse-mosquitto
+    ports:
+      - 1883:1883
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+  mqtt-pub1: # name of the container
+    build: ./mqttPub # where Dockerfile is
+    environment:
+      - THEHOST=mqtt://research.upb.edu:21182
+      - THETOPIC=ds
+    depends_on:
+      - broker
+
+  
